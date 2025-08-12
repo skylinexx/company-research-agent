@@ -42,6 +42,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files AFTER defining routes - serve the built React app
+# We'll add this at the bottom to avoid conflicts with API routes
+
 # Simple authentication
 security = HTTPBasic()
 
@@ -191,21 +194,7 @@ async def process_research(job_id: str, data: ResearchRequest):
         )
         if mongodb:
             mongodb.update_job(job_id=job_id, status="failed", error=str(e))
-# Mount static files - serve the built React app
-ui_dist_path = Path(__file__).parent / "ui" / "dist"
-if ui_dist_path.exists():
-    # Mount assets directory for CSS/JS files
-    app.mount("/assets", StaticFiles(directory=str(ui_dist_path / "assets")), name="assets")
-    # Mount entire dist directory for other static files
-    app.mount("/static", StaticFiles(directory=str(ui_dist_path), html=True), name="static")
-
-@app.get("/")
-async def ping():
-    # Serve the React app's index.html
-    ui_index_path = Path(__file__).parent / "ui" / "dist" / "index.html"
-    if ui_index_path.exists():
-        return FileResponse(str(ui_index_path))
-    return {"message": "Alive"}
+# Root route will be handled by static file mounting at the end
 
 @app.get("/research/pdf/{filename}")
 async def get_pdf(filename: str):
@@ -280,6 +269,12 @@ async def generate_pdf(data: PDFGenerationRequest, current_user: str = Depends(g
             raise HTTPException(status_code=500, detail=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Mount static files at the end - serves React app for any unmatched routes
+ui_dist_path = Path(__file__).parent / "ui" / "dist"
+if ui_dist_path.exists():
+    app.mount("/assets", StaticFiles(directory=str(ui_dist_path / "assets")), name="assets")
+    app.mount("/", StaticFiles(directory=str(ui_dist_path), html=True), name="spa")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
