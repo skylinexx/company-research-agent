@@ -24,16 +24,16 @@ class PDFService:
         sanitized_name = self._sanitize_company_name(company_name)
         return f"{sanitized_name}_report.pdf"
     
-    def generate_pdf_stream(self, markdown_content, company_name=None):
+    def generate_pdf_file(self, markdown_content, company_name=None):
         """
-        Generate a PDF from markdown content and return it as a stream.
+        Generate a PDF from markdown content and save it to a file.
         
         Args:
             markdown_content (str): The markdown content to convert to PDF
             company_name (str, optional): The company name to use in the filename
             
         Returns:
-            tuple: (success status, PDF stream or error message)
+            tuple: (success status, PDF file path or error message)
         """
         try:
             # Extract company name from the first line if not provided
@@ -46,18 +46,13 @@ class PDFService:
             
             # Generate the output filename
             pdf_filename = self._generate_pdf_filename(company_name)
+            pdf_filepath = os.path.join(self.output_dir, pdf_filename)
             
-            # Create a BytesIO object to store the PDF
-            pdf_buffer = io.BytesIO()
+            # Generate the PDF directly to the file
+            generate_pdf_from_md(markdown_content, pdf_filepath)
             
-            # Generate the PDF directly to the buffer
-            generate_pdf_from_md(markdown_content, pdf_buffer)
-            
-            # Reset buffer position to start
-            pdf_buffer.seek(0)
-            
-            # Return success and the buffer
-            return True, (pdf_buffer, pdf_filename)
+            # Return success and the file path
+            return True, (pdf_filepath, pdf_filename)
             
         except Exception as e:
             error_msg = f"Error generating PDF: {str(e)}"

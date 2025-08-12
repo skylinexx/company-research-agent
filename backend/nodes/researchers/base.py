@@ -46,7 +46,7 @@ class BaseResearcher:
             logger.info(f"Generating queries for {company} as {self.analyst_type}")
             
             response = await self.openai_client.chat.completions.create(
-                model="gpt-4.1-mini",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
@@ -58,7 +58,7 @@ class BaseResearcher:
 {self._format_query_prompt(prompt, company, hq, current_year)}"""
                     }
                 ],
-                temperature=0,
+                temperature=0.1,
                 max_tokens=4096,
                 stream=True
             )

@@ -253,7 +253,7 @@ Return the report in clean markdown format. No explanations or commentary."""
         
         try:
             response = await self.openai_client.chat.completions.create(
-                model="gpt-4.1",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
@@ -264,7 +264,7 @@ Return the report in clean markdown format. No explanations or commentary."""
                         "content": prompt
                     }
                 ],
-                temperature=0,
+                temperature=0.1,
                 stream=False
             )
             initial_report = response.choices[0].message.content.strip()
@@ -335,7 +335,7 @@ Return the cleaned report in flawless markdown format. No explanations or commen
         
         try:
             response = await self.openai_client.chat.completions.create(
-                model="gpt-4.1-mini", 
+                model="gpt-4o-mini", 
                 messages=[
                     {
                         "role": "system",
@@ -346,7 +346,7 @@ Return the cleaned report in flawless markdown format. No explanations or commen
                         "content": prompt
                     }
                 ],
-                temperature=0,
+                temperature=0.1,
                 stream=True
             )
             

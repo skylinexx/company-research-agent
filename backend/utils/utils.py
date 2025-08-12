@@ -13,6 +13,8 @@ from reportlab.platypus import (
     SimpleDocTemplate,
     Spacer,
 )
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 def extract_title_from_url_path(url: str) -> str:
@@ -52,6 +54,18 @@ def generate_pdf_from_md(markdown_content: str, output_pdf) -> None:
         markdown_content = markdown_content.replace('\r\n', '\n')  # Normalize Windows line endings
         markdown_content = markdown_content.replace('\\n', '\n')   # Convert literal \n to newlines
         
+        # Try to register the font, fallback to Helvetica if not available
+        try:
+            font_path = os.path.join(os.path.dirname(__file__), '..', 'fonts', 'DejaVuSans.ttf')
+            if os.path.exists(font_path) and os.path.getsize(font_path) > 100000:  # Check if font file is valid
+                pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+                default_font = 'DejaVuSans'
+            else:
+                default_font = 'Helvetica'  # Fallback to built-in font
+        except Exception as e:
+            logger.warning(f"Could not load custom font, using Helvetica: {e}")
+            default_font = 'Helvetica'
+
         # Create the PDF document
         doc = SimpleDocTemplate(
             output_pdf,
@@ -71,7 +85,8 @@ def generate_pdf_from_md(markdown_content: str, output_pdf) -> None:
             parent=styles['Heading1'],
             fontSize=20,
             textColor=colors.black,
-            spaceAfter=12
+            spaceAfter=12,
+            fontName=default_font
         )
         
         heading2_style = ParagraphStyle(
@@ -81,7 +96,7 @@ def generate_pdf_from_md(markdown_content: str, output_pdf) -> None:
             textColor=colors.black,
             spaceBefore=12,
             spaceAfter=6,
-            fontName='Helvetica-Bold'
+            fontName=default_font
         )
         
         heading3_style = ParagraphStyle(
@@ -90,7 +105,8 @@ def generate_pdf_from_md(markdown_content: str, output_pdf) -> None:
             fontSize=12,
             textColor=colors.black,
             spaceBefore=10,
-            spaceAfter=4
+            spaceAfter=4,
+            fontName=default_font
         )
         
         normal_style = ParagraphStyle(
@@ -99,7 +115,8 @@ def generate_pdf_from_md(markdown_content: str, output_pdf) -> None:
             fontSize=10,
             textColor=colors.black,
             spaceBefore=2,
-            spaceAfter=2
+            spaceAfter=2,
+            fontName=default_font
         )
         
         list_item_style = ParagraphStyle(
@@ -111,7 +128,8 @@ def generate_pdf_from_md(markdown_content: str, output_pdf) -> None:
             spaceAfter=2,
             leftIndent=10,
             firstLineIndent=0,
-            bulletIndent=0
+            bulletIndent=0,
+            fontName=default_font
         )
         
         # Create the story (content)

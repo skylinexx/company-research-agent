@@ -8,10 +8,12 @@ from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
+import secrets
 
 from backend.graph import Graph
 from backend.services.mongodb import MongoDBService
@@ -38,6 +40,25 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Simple authentication
+security = HTTPBasic()
+
+def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    # Get credentials from environment variables
+    correct_username = os.getenv("ADMIN_USERNAME", "admin")
+    correct_password = os.getenv("ADMIN_PASSWORD", "admin123")
+    
+    is_correct_username = secrets.compare_digest(credentials.username, correct_username)
+    is_correct_password = secrets.compare_digest(credentials.password, correct_password)
+    
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 manager = WebSocketManager()
 pdf_service = PDFService({"pdf_output_dir": "pdfs"})
@@ -79,7 +100,7 @@ async def preflight():
     return response
 
 @app.post("/research")
-async def research(data: ResearchRequest):
+async def research(data: ResearchRequest, current_user: str = Depends(get_current_user)):
     try:
         logger.info(f"Received research request for {data.company}")
         job_id = str(uuid.uuid4())
@@ -231,18 +252,16 @@ async def get_research_report(job_id: str):
     return report
 
 @app.post("/generate-pdf")
-async def generate_pdf(data: PDFGenerationRequest):
+async def generate_pdf(data: PDFGenerationRequest, current_user: str = Depends(get_current_user)):
     """Generate a PDF from markdown content and stream it to the client."""
     try:
-        success, result = pdf_service.generate_pdf_stream(data.report_content, data.company_name)
+        success, result = pdf_service.generate_pdf_file(data.report_content, data.company_name)
         if success:
-            pdf_buffer, filename = result
-            return StreamingResponse(
-                pdf_buffer,
+            pdf_filepath, pdf_filename = result
+            return FileResponse(
+                pdf_filepath,
                 media_type='application/pdf',
-                headers={
-                    'Content-Disposition': f'attachment; filename="{filename}"'
-                }
+                filename=pdf_filename
             )
         else:
             raise HTTPException(status_code=500, detail=result)
