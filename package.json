@@ -1,0 +1,12 @@
+{
+  "name": "company-research-agent",
+  "version": "1.0.0",
+  "description": "Agentic Company Research Tool",
+  "scripts": {
+    "build": "cd ui && npm install && npm run build",
+    "start": "uvicorn application:app --host 0.0.0.0 --port $PORT"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

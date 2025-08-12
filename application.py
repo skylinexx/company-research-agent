@@ -194,7 +194,10 @@ async def process_research(job_id: str, data: ResearchRequest):
 # Mount static files - serve the built React app
 ui_dist_path = Path(__file__).parent / "ui" / "dist"
 if ui_dist_path.exists():
-    app.mount("/static", StaticFiles(directory=str(ui_dist_path / "assets")), name="static")
+    # Mount assets directory for CSS/JS files
+    app.mount("/assets", StaticFiles(directory=str(ui_dist_path / "assets")), name="assets")
+    # Mount entire dist directory for other static files
+    app.mount("/static", StaticFiles(directory=str(ui_dist_path), html=True), name="static")
 
 @app.get("/")
 async def ping():
