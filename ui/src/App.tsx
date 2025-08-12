@@ -623,7 +623,7 @@ function App() {
       const response = await fetch(url, {
         method: "POST",
         mode: "cors",
-        credentials: "omit",
+        credentials: "include",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -671,6 +671,7 @@ function App() {
       console.log("Generating PDF with company name:", originalCompanyName);
       const response = await fetch(`${API_URL}/generate-pdf`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
