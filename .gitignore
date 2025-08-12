@@ -32,6 +32,12 @@ logs/
 # PDF outputs
 pdfs/*.pdf
 
+# Large media files
+static/demo.mp4
+*.mp4
+*.mov
+*.avi
+
 # OS
 .DS_Store
 Thumbs.db
