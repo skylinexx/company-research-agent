@@ -12,7 +12,7 @@
 
 A multi-agent tool that generates comprehensive company research reports. The platform uses a pipeline of AI agents to gather, curate, and synthesize information about any company.
 
-✨Check it out online! https://companyresearcher.tavily.com ✨
+✨Check it out online! ✨
 
 https://github.com/user-attachments/assets/0e373146-26a7-4391-b973-224ded3182a9
 
@@ -132,8 +132,8 @@ The easiest way to get started is using the setup script, which automatically de
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/pogjester/tavily-company-research.git
-cd tavily-company-research
+git clone https://github.com/skylinexx/company-research-agent.git
+cd company-research-agent
 ```
 
 2. Make the setup script executable and run it:
@@ -170,8 +170,8 @@ If you prefer to set up manually, follow these steps:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/pogjester/tavily-company-research.git
-cd tavily-company-research
+git clone https://github.com/skylinexx/company-research-agent.git
+cd company-research-agent
 ```
 
 2. Install backend dependencies:
@@ -238,8 +238,8 @@ The application can be run using Docker and Docker Compose:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/pogjester/tavily-company-research.git
-cd tavily-company-research
+git clone https://github.com/skylinexx/company-research-agent.git
+cd company-research-agent
 ```
 
 2. **Set up Environment Variables**:
@@ -354,23 +354,6 @@ npm run dev
 
 The application can be deployed to various cloud platforms. Here are some common options:
 
-#### AWS Elastic Beanstalk
-
-1. Install the EB CLI:
-   ```bash
-   pip install awsebcli
-   ```
-
-2. Initialize EB application:
-   ```bash
-   eb init -p python-3.11 tavily-research
-   ```
-
-3. Create and deploy:
-   ```bash
-   eb create tavily-research-prod
-   ```
-
 #### Other Deployment Options
 
 - **Docker**: The application includes a Dockerfile for containerized deployment
@@ -391,7 +374,3 @@ Choose the platform that best suits your needs. The application is platform-agno
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
-
-- [Tavily](https://tavily.com/) for the research API
-- All other open-source libraries and their contributors
