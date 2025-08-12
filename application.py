@@ -12,6 +12,7 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depe
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import secrets
 
@@ -190,8 +191,17 @@ async def process_research(job_id: str, data: ResearchRequest):
         )
         if mongodb:
             mongodb.update_job(job_id=job_id, status="failed", error=str(e))
+# Mount static files - serve the built React app
+ui_dist_path = Path(__file__).parent / "ui" / "dist"
+if ui_dist_path.exists():
+    app.mount("/static", StaticFiles(directory=str(ui_dist_path / "assets")), name="static")
+
 @app.get("/")
 async def ping():
+    # Serve the React app's index.html
+    ui_index_path = Path(__file__).parent / "ui" / "dist" / "index.html"
+    if ui_index_path.exists():
+        return FileResponse(str(ui_index_path))
     return {"message": "Alive"}
 
 @app.get("/research/pdf/{filename}")
