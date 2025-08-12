@@ -194,7 +194,14 @@ async def process_research(job_id: str, data: ResearchRequest):
         )
         if mongodb:
             mongodb.update_job(job_id=job_id, status="failed", error=str(e))
-# Root route will be handled by static file mounting at the end
+@app.get("/")
+async def serve_react_app():
+    """Serve the React app's index.html"""
+    ui_index_path = Path(__file__).parent / "ui" / "dist" / "index.html"
+    if ui_index_path.exists():
+        return FileResponse(str(ui_index_path))
+    # Fallback if dist doesn't exist yet
+    return {"status": "React app building...", "message": "Please wait while the frontend builds"}
 
 @app.get("/research/pdf/{filename}")
 async def get_pdf(filename: str):
@@ -270,11 +277,28 @@ async def generate_pdf(data: PDFGenerationRequest, current_user: str = Depends(g
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Mount static files at the end - serves React app for any unmatched routes
+# Mount static files for assets (CSS, JS, images)
 ui_dist_path = Path(__file__).parent / "ui" / "dist"
 if ui_dist_path.exists():
+    # Mount assets for CSS/JS files
     app.mount("/assets", StaticFiles(directory=str(ui_dist_path / "assets")), name="assets")
-    app.mount("/", StaticFiles(directory=str(ui_dist_path), html=True), name="spa")
+    # Mount static files for favicon, images, etc.
+    app.mount("/favicon.ico", StaticFiles(directory=str(ui_dist_path)), name="favicon")
+    app.mount("/tavilylogo.png", StaticFiles(directory=str(ui_dist_path)), name="logo")
+
+# Catch-all route for React Router - must be LAST
+@app.get("/{full_path:path}")
+async def catch_all(full_path: str):
+    """Catch-all route to serve React app for client-side routing"""
+    # Don't intercept API routes
+    if full_path.startswith(("research", "generate-pdf", "docs", "openapi.json")):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
+    # Serve React app for all other routes
+    ui_index_path = Path(__file__).parent / "ui" / "dist" / "index.html"
+    if ui_index_path.exists():
+        return FileResponse(str(ui_index_path))
+    return {"status": "React app building...", "message": "Please wait while the frontend builds"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
