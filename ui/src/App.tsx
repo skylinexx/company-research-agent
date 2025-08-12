@@ -9,15 +9,7 @@ import ResearchForm from './components/ResearchForm';
 import {ResearchOutput, DocCount,DocCounts, EnrichmentCounts, ResearchState, ResearchStatusType} from './types';
 import { checkForFinalReport } from './utils/handlers';
 import { colorAnimation, dmSansStyle, glassStyle, fadeInAnimation } from './styles';
-
-const API_URL = import.meta.env.VITE_API_URL;
-const WS_URL = import.meta.env.VITE_WS_URL;
-
-if (!API_URL || !WS_URL) {
-  throw new Error(
-    "Environment variables VITE_API_URL and VITE_WS_URL must be set"
-  );
-}
+import { API_URL, WS_URL } from './utils/constants';
 
 // Add styles to document head
 const colorStyle = document.createElement('style');

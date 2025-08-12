@@ -1,6 +1,16 @@
 // API and WebSocket URLs
-export const API_URL = import.meta.env.VITE_API_URL;
-export const WS_URL = import.meta.env.VITE_WS_URL;
+// In production, use the same domain. In development, use env vars.
+const isProduction = import.meta.env.PROD;
+const currentHost = window.location.hostname;
+const currentProtocol = window.location.protocol;
+
+export const API_URL = import.meta.env.VITE_API_URL || 
+  (isProduction ? '' : 'http://localhost:8000');
+
+export const WS_URL = import.meta.env.VITE_WS_URL || 
+  (isProduction 
+    ? `${currentProtocol === 'https:' ? 'wss:' : 'ws:'}//${currentHost}` 
+    : 'ws://localhost:8000');
 
 // WebSocket Configuration
 export const MAX_RECONNECT_ATTEMPTS = 3;
